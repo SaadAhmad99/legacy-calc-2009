@@ -12,3 +12,6 @@ g++ -std=c++11 *.cpp -o calc
 
 ## Branch Information
 All assignment work is done in the `dev` branch as required.
+
+Saad Ahmad
+Mustagees Shahid
