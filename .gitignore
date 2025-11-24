@@ -1,8 +1,7 @@
-*.[oa]
-*~
-*.mk
-build/
-nbproject/
-.sconsign.dblite
-loanCalculator
-moc*.cc
+# Build artifacts
+*.o
+*.obj
+*.exe
+calc
+.DS_Store
+*.log
