@@ -1,0 +1,7 @@
+# Build artifacts
+*.o
+*.obj
+*.exe
+calc
+.DS_Store
+*.log
