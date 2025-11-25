@@ -6,9 +6,9 @@
 #include <stdexcept>
 #include <string>
 
-#include <QApplication>
+//#include <QApplication>
 
-#include <LoanCalcQtMainWindow.h>
+//#include <LoanCalcQtMainWindow.h>
 #include <CmdLineParser.h>
 #include <LoanCalculator.h>
 
@@ -127,12 +127,8 @@ int main(int argc, char **argv)
   // If no arguments are given, then launch the GUI
   if(argc == 1)
   {
-    QApplication app(argc, argv);
-
-    LoanCalcQtMainWindow mainWindow(&calculator);
-    mainWindow.show();
-
-    return app.exec();
+    std::cerr << "No arguments provided. Please use command-line options.\n";
+    return 1;
   }
 
   //
