@@ -53,14 +53,14 @@ public:
   /**
    * Total loan amount A
    */
-  inline void setAmount(float A) { amount_ = A; amountSet_ = true; }
-  inline float getAmount() const { return amount_; }
+  inline void setAmount(long double A) { amount_ = A; amountSet_ = true; }
+  inline long double getAmount() const { return amount_; }
 
   /**
    * Initial down payment
    */
-  inline void setInitialPayment(float initialA)  { initialPayment_ = initialA; }
-  inline float getInitialPayment() const         { return initialPayment_; }
+  inline void setInitialPayment(long double initialA)  { initialPayment_ = initialA; }
+  inline long double getInitialPayment() const         { return initialPayment_; }
 
   /**
    * Yearly interest rate i as in 6.75
@@ -70,11 +70,11 @@ public:
    *    getPeriodicInterest() will return .0675/12.0
    */
   void setInterest(float i) { interest_ = i; interestPeriodic_ = i/100.0/12.0; interestSet_ = true; }
-  inline float getInterest() const         { return interest_; }
-  inline float getPeriodicInterest() const { return interestPeriodic_; }
+  inline long double getInterest() const         { return interest_; }
+  inline long double getPeriodicInterest() const { return interestPeriodic_; }
 
-  void setPayment(float P)        { payment_ = P; paymentSet_ = true; }
-  inline float getPayment() const { return payment_; }
+  void setPayment(long double P)        { payment_ = P; paymentSet_ = true; }
+  inline long double getPayment() const { return payment_; }
 
   void setPeriodTotal(int N)        { periodTotal_ = N; periodTotalSet_ = true; }
   inline int getPeriodTotal() const { return periodTotal_; }
@@ -82,11 +82,11 @@ public:
   void setPeriodElapsed(int n)         { periodElapsed_ = n; periodElapsedSet_ = true; }
   inline int getPeriodElapsed() const  { return periodElapsed_; }
 
-  inline void setOpeningFee(float fee) { openingFee_ = fee; }
-  inline float getOpeningFee() const   { return openingFee_; }
+  inline void setOpeningFee(long double fee) { openingFee_ = fee; }
+  inline long double getOpeningFee() const   { return openingFee_; }
 
-  inline void setOpeningPercent(float percent) { openingPercent_ = percent; }
-  inline float getOpeningPercent() const       { return openingPercent_; }
+  inline void setOpeningPercent(long double percent) { openingPercent_ = percent; }
+  inline long double getOpeningPercent() const       { return openingPercent_; }
 
   inline void reset() {
     amount_ = initialPayment_ = interest_ = interestPeriodic_ = payment_ = openingFee_ = openingPercent_ = 0.0;
@@ -98,27 +98,27 @@ public:
   // The actual calculation methods
   //
 
-  float calculateLoanBalance();
-  float calculatePayment();
-  float calculateNumberPayments();
-  float calculateLoanAmount();
-  float calculateInterestRate();
+  long double calculateLoanBalance();
+  long double calculatePayment();
+  long double calculateNumberPayments();
+  long double calculateLoanAmount();
+  long double calculateInterestRate();
   // The effective interest rate, once fees have been applied
-  float calculateEffectiveInterestRate();
+  long double calculateEffectiveInterestRate();
 
   std::string toString();
 
 private:
-  float amount_;        // loan amount
+  long double amount_;        // loan amount
   bool amountSet_;
 
-  float initialPayment_;     // initial down payment
+  long double initialPayment_;     // initial down payment
 
-  float interest_;          // interest rate, something like 6.75
-  float interestPeriodic_;  // this will be .0675/12
+  long double interest_;          // interest rate, something like 6.75
+  long double interestPeriodic_;  // this will be .0675/12
   bool interestSet_;
 
-  float payment_;       // payment amount
+  long double payment_;       // payment amount
   bool paymentSet_;
 
   int periodTotal_;     // total payment periods
@@ -128,9 +128,10 @@ private:
   bool periodElapsedSet_;
 
   // These two are used if loans charge a fee opening fee or percentage
-  float openingFee_;
-  float openingPercent_;
+  long double openingFee_;
+  long double openingPercent_;
 
 };
 
 #endif // LOANCALCULATOR_H_INCLUDED
+
