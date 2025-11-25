@@ -1,4 +1,5 @@
-
+#include<fstream>
+#include<iomanip>
 #include <stdlib.h>
 
 #include <exception>
@@ -123,6 +124,34 @@ CALC_TYPE parseCommandLine(int argc, char **argv, CmdLineParser &clp, LoanCalcul
 int main(int argc, char **argv)
 {
   LoanCalculator calculator;
+  // Attempt to read defaults from config.txt (optional)
+std::ifstream cfg("config.txt");
+if (cfg) {
+    long double cfg_amount;           // use long double variable here
+    long double cfg_interest;
+    int cfg_period;
+    long double cfg_openfee;
+    long double cfg_openpercent;
+
+    // read values in a known order, handle missing/invalid lines
+    if (cfg >> cfg_amount) {
+        // set value on calculator (use setter)
+        calculator.setAmount((float)cfg_amount); // cast if your setter uses float; if you changed to long double use that type
+    }
+    if (cfg >> cfg_interest) {
+        calculator.setInterest((float)cfg_interest);
+    }
+    if (cfg >> cfg_period) {
+        calculator.setPeriodTotal(cfg_period);
+    }
+    if (cfg >> cfg_openfee) {
+        calculator.setOpeningFee((float)cfg_openfee);
+    }
+    if (cfg >> cfg_openpercent) {
+        calculator.setOpeningPercent((float)cfg_openpercent);
+    }
+    // If desired: print a message that config loaded
+}
 
   // If no arguments are given, then launch the GUI
   if(argc == 1)
@@ -138,66 +167,94 @@ int main(int argc, char **argv)
   //
   // Parse the command line arguments
   //
-  CmdLineParser clp;
-  loadCmdLine(clp);
-  CALC_TYPE ct = parseCommandLine(argc, argv, clp, calculator);
+ // Parse the command line arguments
+CmdLineParser clp;
+loadCmdLine(clp);
 
-  try
-  {
-    cout << endl;
+CALC_TYPE ct = CALC_UNKNOWN;
+try {
+    ct = parseCommandLine(argc, argv, clp, calculator);
+} catch (const std::exception &ex) {
+    std::cerr << "Error parsing command line: " << ex.what() << std::endl;
+    clp.printUsage();
+    return 1;
+}
 
-    // Not sure why I had to cast the result to float, but otherwise it printed strange results
-    if(ct == CALC_BALANCE)
-    {
-        cout << "Loan Balance = " << (float) calculator.calculateLoanBalance() << endl;
-    }
-    else if(ct == CALC_PAYMENT)
-    {
-      float payment = calculator.calculatePayment();
-      cout << "Monthly Payment    = " << payment << "\n"
-           << "Total amt paid     = " << (float) (payment*calculator.getPeriodTotal())
-           << endl;
+// -----------------------
+// Input validation
+// -----------------------
+if (calculator.getAmount() <= 0.0L) {
+    cerr << "Error: Loan amount must be > 0\n";
+    return 1;
+}
+if (calculator.getInterest() < 0.0L) {
+    cerr << "Error: Interest rate cannot be negative\n";
+    return 1;
+}
+if (calculator.getPeriodTotal() <= 0) {
+    cerr << "Error: Loan period must be > 0 months\n";
+    return 1;
+}
+if (calculator.getPeriodElapsed() < 0 ||
+    calculator.getPeriodElapsed() > calculator.getPeriodTotal()) {
+    cerr << "Error: Elapsed months must be between 0 and total period\n";
+    return 1;
+}
+if (calculator.getPayment() < 0.0L) {
+    cerr << "Error: Payment cannot be negative\n";
+    return 1;
+}
+if (calculator.getOpeningPercent() < 0.0L || calculator.getOpeningPercent() > 100.0L) {
+    cerr << "Error: Opening percent must be between 0 and 100\n";
+    return 1;
+}
+if (calculator.getOpeningFee() < 0.0L) {
+    cerr << "Error: Opening fee cannot be negative\n";
+    return 1;
+}
 
-      if(calculator.getOpeningPercent() != 0.0 || calculator.getOpeningFee() != 0.0)
-      {
-        cout << "Interest with fees = "
-             << (float) calculator.calculateEffectiveInterestRate()
-             << "%"
-             << endl;
-      }
+// Perform calculations and print results (guarded with a try to catch runtime errors)
+try {
+    cout << fixed << setprecision(2);
+
+    if (ct == CALC_BALANCE) {
+        auto bal = calculator.calculateLoanBalance();
+        cout << "Loan Balance = " << bal << endl;
     }
-    else if(ct == CALC_NUMPAYMENTS)
-    {
-      cout << "Number of payments = " << (float) calculator.calculateNumberPayments() << endl;
+    else if (ct == CALC_PAYMENT) {
+        auto payment = calculator.calculatePayment();
+        cout << "Monthly Payment    = " << payment << "\n"
+             << "Total amt paid     = " << (payment * calculator.getPeriodTotal()) << endl;
+
+        if (calculator.getOpeningPercent() != 0.0L || calculator.getOpeningFee() != 0.0L) {
+            auto eff = calculator.calculateEffectiveInterestRate();
+            cout << "Effective Yearly Interest (with fees) = " << eff << " %" << endl;
+        }
     }
-    else if(ct == CALC_AMOUNT)
-    {
-      cout << "Initial Loan amount = " << (float) calculator.calculateLoanAmount() << endl;
+    else if (ct == CALC_NUMPAYMENTS) {
+        auto n = calculator.calculateNumberPayments();
+        cout << "Number of payments = " << n << endl;
     }
-    else if(ct == CALC_INTEREST)
-    {
-      cout << "Yearly Interest Rate = " << (float) calculator.calculateInterestRate() << "%" << endl;
+    else if (ct == CALC_AMOUNT) {
+        auto amt = calculator.calculateLoanAmount();
+        cout << "Initial Loan amount = " << amt << endl;
     }
-    else if(ct == CALC_UNKNOWN)
-    {
-      // most likely the case that help was selected
-      return 1;
+    else if (ct == CALC_INTEREST) {
+        auto ir = calculator.calculateInterestRate();
+        cout << "Yearly Interest Rate = " << ir << " %" << endl;
     }
-    else
-    {
-      cerr << "Unrecognized calculation type, exiting" << endl;
-      return 0;
+    else if (ct == CALC_UNKNOWN) {
+        // most likely the case that help was selected
+        return 1;
+    }
+    else {
+        cerr << "Unrecognized calculation type, exiting" << endl;
+        return 1;
     }
 
     // print the values set on the calculator
     cout << calculator.toString() << endl;
-  }
-  catch(const exception &e)
-  {
-    cerr << "Error executing loan calculator: " << + e.what() << endl;
-    //printUsage();
-    //return 0;
-  }
-
-  cout << endl;
+} catch (const std::exception &e) {
+    cerr << "Error executing loan calculator: " << e.what() << endl;
+    return 1;
 }
